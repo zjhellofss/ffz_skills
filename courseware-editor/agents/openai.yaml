@@ -1,0 +1,4 @@
+interface:
+  display_name: "Courseware Editor"
+  short_description: "Refine and structure teaching materials"
+  default_prompt: "Use $courseware-editor to rewrite and organize my slide or lecture content clearly."

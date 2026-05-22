@@ -1,69 +1,79 @@
 ---
 name: review-vllm-courseware
-description: Review and revise Chinese vLLM courseware against the local vLLM source tree and the installed $courseware-editor skill. Use when the user sends vLLM lesson text, asks to check factual accuracy, asks whether content has omissions, or asks for corrected courseware text based on /root/miniconda3/lib/python3.12/site-packages/vllm.
+description: Review and revise Chinese vLLM courseware against the source code of the locally installed vLLM Python package and the installed `$courseware-editor` skill. Use when the user provides vLLM lesson text, asks to verify factual accuracy, asks whether the content has important omissions, or requests corrected courseware text based on the locally installed vLLM Python package.
 ---
 
 # Review vLLM Courseware
 
 ## Workflow
 
-1. Apply the installed `$courseware-editor` skill before reviewing the lesson. If the skill is not already loaded in the current session, read `/root/.codex/skills/courseware-editor/SKILL.md` and any directly referenced files needed for the requested output mode.
-2. Treat `/root/miniconda3/lib/python3.12/site-packages/vllm` as the primary technical authority for vLLM behavior. Use `rg`, source reads, and local docs in that tree as needed.
-3. Check only the courseware text the user provides. Preserve its structure, tone, teaching rhythm, headings, and level unless a change is necessary for correctness or clarity.
-4. Fix technical errors that conflict with the local source. For source-backed judgments, cite specific files, classes, functions, or line references when practical.
-5. Look for important omissions only when the omission would materially hurt the lesson's accuracy or learner understanding. Do not expand merely to make the lesson more comprehensive.
-6. If a claim cannot be confirmed from the local source, say `源码中未确认` instead of relying on memory.
-7. Do not browse the web unless the user explicitly asks. If local source and external knowledge conflict, prefer the local source and say so.
+1. Apply the installed `$courseware-editor` skill before reviewing the lesson. If it is not already loaded in the current session, read `/root/.codex/skills/courseware-editor/SKILL.md` and any files it directly references that are needed for the requested output mode.
+2. Treat the source tree of the vLLM library installed via Python as the primary technical authority for vLLM behavior. Use `python` to locate the installed package path when needed, and use tools such as `rg`, direct source inspection, and local documentation in that tree for verification.
+3. Review only the courseware text provided by the user. Preserve its structure, tone, teaching rhythm, headings, and difficulty level unless a change is necessary for correctness or clarity.
+4. Correct technical errors that conflict with the local source. When a judgment is supported by the source, cite specific files, classes, functions, or line references when practical.
+5. Identify important omissions only when they would materially affect the lesson’s accuracy or the learner’s understanding. Do not expand the lesson merely to make it more comprehensive.
+6. If a claim cannot be confirmed from the local source, do not rely on memory. List it in a separate `Unconfirmed in Source` section rather than mixing it into the main body.
+7. Do not browse the web unless the user explicitly asks you to. If external knowledge conflicts with the local source, prefer the local source and state that clearly.
 
 ## Review Focus
 
 Prioritize:
 
-- incorrect vLLM architecture, execution flow, scheduler/cache/worker/model-runner behavior, or API usage
-- version-sensitive behavior that should be verified in the installed source tree
-- unclear explanations that may mislead students
-- missing prerequisites, constraints, or caveats that are necessary for the specific lesson topic
-- mismatches between the courseware and the courseware-editor style or formatting rules
+- incorrect or misleading explanations of how vLLM is designed, implemented, configured, executed, or exposed through its APIs and internal components
+- version-sensitive behavior that should be verified against the installed source tree
+- unclear explanations that may mislead learners
+- missing prerequisites, constraints, caveats, or assumptions that are necessary for the specific lesson topic
+- mismatches with the style or formatting rules required by the courseware-editor skill
 
 Avoid:
 
-- unrelated refactors of the lesson
-- broad background additions that are not needed for the current topic
-- changing examples, terminology, or ordering when the original is already correct and clear
+- unrelated refactoring of the lesson
+- broad background additions that are not necessary for the current topic
+- changing examples, terminology, or ordering when the original content is already correct and clear
 
 ## Output
 
-Respond in Chinese. Output only the findings and the revised text.
+Respond in Chinese. Output only the findings, the unconfirmed-in-source items, and the revised text.
 
 Use this structure:
 
 ```markdown
-## 发现的问题
+## Findings
 
-- 问题 1：
-  - 原文：
-  - 问题说明：
-  - 依据：
+- Issue 1:
+  - Original:
+  - Problem:
+  - Evidence:
 
-- 必要补充：
-  - 补充原因：
-  - 建议补充位置：
+- Required Additions:
+  - Reason:
+  - Suggested Location:
 
-## 修改后的文本
+## Unconfirmed in Source
 
-<完整的修改后课件文本>
+- Claim 1:
+  - Original:
+  - Note:
+
+## Revised Text
+
+<full revised courseware text>
 ```
 
 If there are no clear errors, write:
 
 ```markdown
-## 发现的问题
+## Findings
 
-未发现明确错误。
+No clear errors found.
 
-## 修改后的文本
+## Unconfirmed in Source
 
-<原文，或只包含必要补充后的完整文本>
+None.
+
+## Revised Text
+
+<original text, or the full text with only necessary additions>
 ```
 
-Omit the `必要补充` item when no supplement is needed.
+Omit the `Required Additions` item when no additions are needed.

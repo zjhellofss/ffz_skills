@@ -28,21 +28,37 @@ Do not use this skill for general Feishu messaging, calendar, Base, or approval 
 ## Workflow
 
 1. Check local readiness first.
-   Run `lark-cli auth status` and confirm the active identity is usable. For doc creation, verify required scopes before attempting writes.
+   Run `lark-cli auth status` and confirm the active identity is usable. For document work, verify scopes before attempting fetches or writes.
 
-2. Pick the right document surface.
+2. Determine whether the task needs read, write, or both.
+   Fetching or inspecting a doc requires `docx:document:readonly`.
+   Creating a new cloud doc requires `docx:document:create`.
+   Updating an existing cloud doc requires `docx:document:write_only` or broader `docx:document`.
+   Do not assume `create` implies `readonly` or `write_only`; in this environment they can be granted separately.
+
+3. Pick the right document surface.
    Use `docs` for Feishu cloud docs.
    Use `markdown` for Drive-native Markdown files.
    Use `wiki` only when the target is explicitly a knowledge-base node or wiki space.
 
-3. Prefer direct execution over explanation.
+4. Fetch before destructive edits.
+   If the user asks to revise, reorganize, or "整理" an existing doc, fetch it first and inspect the current structure before deciding whether to patch in place or generate a cleaned replacement.
+
+5. Prefer direct execution over explanation.
    If the user wants a document created or updated, generate the content, execute the command, and return the resulting URL.
 
-4. Treat permission errors as an expected workflow.
+6. Treat permission errors as an expected workflow.
    If `missing_scope` appears, request only the missing scopes with `lark-cli auth login --no-wait --json --scope "..."`, return the raw verification URL to the user, then resume later with `lark-cli auth login --device-code ...` after the user confirms authorization.
 
-5. Keep content in local files when the document is substantial.
+7. Keep content in local files when the document is substantial.
    Draft the Markdown locally first, then upload or push it to Feishu. This makes retries, diffs, and follow-up edits easier.
+
+8. Validate `docs +update` in-session before depending on it.
+   In this environment, `lark-cli docs +update --help` may advertise a working `--mode ... --markdown ...` flow, but runtime can still fail with `validation: --command is required` on `lark-cli` `1.0.38`.
+   If the first update attempt fails that way, do not keep retrying equivalent invocations.
+   Fall back to one of these paths:
+   - if the user mainly needs a cleaned deliverable, create a new Feishu doc from the prepared Markdown and return the new URL
+   - if the user explicitly requires in-place mutation of the original doc, explain that the high-level CLI update path is broken in the current environment and only proceed with lower-level block APIs if the extra complexity is justified
 
 ## Command Selection
 
@@ -70,6 +86,8 @@ Choose the smallest correct update mode:
 
 If precise placement matters, use `--selection-by-title` or `--selection-with-ellipsis`.
 
+Important runtime note: on `lark-cli` `1.0.38`, help text and runtime behavior can diverge. If `docs +update` returns `validation: --command is required`, treat that as a CLI implementation issue rather than a content-formatting issue.
+
 ### Fetch a Feishu cloud doc
 
 Use `lark-cli docs +fetch --api-version v2 --doc <url-or-token>`.
@@ -94,7 +112,9 @@ Use `lark-cli docs +search` when the user needs to locate an existing document b
 
 Check scopes before retries. Common scopes for document work include:
 
+- `docx:document:readonly` for fetching or inspecting cloud docs
 - `docx:document:create` for cloud doc creation
+- `docx:document:write_only` for updating existing cloud docs
 - `drive:file:upload` for Markdown upload or document media upload
 - `drive:drive.metadata:readonly` for Drive metadata access
 
@@ -119,8 +139,14 @@ When this skill is used for execution, the response should usually include:
 
 When blocked, report the exact missing scope or validation issue and the next command needed to unblock it.
 
+If the document had to be recreated because in-place update was blocked by CLI behavior, state that explicitly and provide both:
+
+- the new Feishu document URL
+- the reason the original doc was not updated in place
+
 ## Notes
 
 - Prefer `--api-version v2` for `docs` operations.
 - If a file reference is rejected because it is absolute, change to the target directory and use a relative path.
 - If the CLI help text conflicts with runtime behavior, trust validated command recipes from [references/recipes.md](references/recipes.md) and mention the discrepancy in the result.
+- If the task is "整理现有文档", the safest default is: `auth status` -> fetch -> draft locally -> attempt update once -> on `--command is required`, create a new cleaned doc and return that link.

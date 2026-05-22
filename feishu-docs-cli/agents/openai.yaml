@@ -1,0 +1,4 @@
+interface:
+  display_name: "Feishu Docs CLI"
+  short_description: "Use Feishu CLI to create and update docs"
+  default_prompt: "Use $feishu-docs-cli to create, update, fetch, or troubleshoot Feishu documents with lark-cli."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review vLLM Courseware"
+  short_description: "Review vLLM lessons against local source"
+  default_prompt: "Use $review-vllm-courseware to check and revise this vLLM courseware against the local vLLM source."

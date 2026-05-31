@@ -28,7 +28,7 @@ Do not use this skill for general Feishu messaging, calendar, Base, or approval 
 ## Workflow
 
 1. Check local readiness first.
-   Run `lark-cli auth status` and confirm the active identity is usable. For document work, verify scopes before attempting fetches or writes.
+   Run `command -v lark-cli` before any document operation. If it is unavailable, report that `lark-cli` must be installed or added to `PATH` before this skill can execute Feishu commands. Then run `lark-cli auth status` and confirm the active identity is usable. For document work, verify scopes before attempting fetches or writes.
 
 2. Determine whether the task needs read, write, or both.
    Fetching or inspecting a doc requires `docx:document:readonly`.

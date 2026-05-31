@@ -7,8 +7,8 @@ description: Review and revise Chinese vLLM courseware against the source code o
 
 ## Workflow
 
-1. Apply the installed `$courseware-editor` skill before reviewing the lesson. If it is not already loaded in the current session, read `/root/.codex/skills/courseware-editor/SKILL.md` and any files it directly references that are needed for the requested output mode.
-2. Treat the source tree of the vLLM library installed via Python as the primary technical authority for vLLM behavior. Use `python` to locate the installed package path when needed, and use tools such as `rg`, direct source inspection, and local documentation in that tree for verification.
+1. Apply the installed `$courseware-editor` skill before reviewing the lesson. If it is not already loaded in the current session, read `${CODEX_HOME:-$HOME/.codex}/skills/courseware-editor/SKILL.md` and any files it directly references that are needed for the requested output mode.
+2. Treat the source tree of the vLLM library installed via Python as the primary technical authority for vLLM behavior. Use `python3` to locate the installed package path when needed, falling back to `python` only if `python3` is unavailable. Then use tools such as `rg`, direct source inspection, and local documentation in that tree for verification.
 3. Review only the courseware text provided by the user. Preserve its structure, tone, teaching rhythm, headings, and difficulty level unless a change is necessary for correctness or clarity.
 4. Correct technical errors that conflict with the local source. When a judgment is supported by the source, cite specific files, classes, functions, or line references when practical.
 5. Identify important omissions only when they would materially affect the lesson’s accuracy or the learner’s understanding. Do not expand the lesson merely to make it more comprehensive.

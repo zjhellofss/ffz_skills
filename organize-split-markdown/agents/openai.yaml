@@ -1,4 +1,4 @@
 interface:
   display_name: "整理并切分 Markdown"
-  short_description: "分阶段规范 Markdown 格式并按语义切分文档"
-  default_prompt: "Use $organize-split-markdown to standardize this Markdown document and split it into semantically complete files."
+  short_description: "按细粒度语义分段，并逐段整理 Markdown 后输出"
+  default_prompt: "Use $organize-split-markdown to split this Markdown document into fine-grained, semantically complete segments for downstream model processing, normalize each segment before writing it, and generate an index without changing content."

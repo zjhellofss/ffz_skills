@@ -1,0 +1,4 @@
+interface:
+  display_name: "Extract vLLM Revised Text"
+  short_description: "Extract revised sections from reviewed vLLM Markdown"
+  default_prompt: "Use $extract-vllm-revised-text to extract each reviewed Markdown file revised text into an output directory."

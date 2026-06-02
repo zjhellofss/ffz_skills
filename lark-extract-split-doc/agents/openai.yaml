@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lark Extract and Split Doc"
+  short_description: "提取飞书文档，保留图片表格和嵌入数据，并按语义切分为 Markdown"
+  default_prompt: "Use $lark-extract-split-doc to extract a Feishu document with visible rich content and split it into semantic Markdown segments."

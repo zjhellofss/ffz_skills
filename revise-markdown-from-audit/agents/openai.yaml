@@ -1,0 +1,4 @@
+interface:
+  display_name: "Revise Markdown From Audit"
+  short_description: "Conservative Markdown revisions plus change lists"
+  default_prompt: "Use $revise-markdown-from-audit to apply confirmed audit findings to a Markdown copy while preserving the original and generating a machine-readable change list."

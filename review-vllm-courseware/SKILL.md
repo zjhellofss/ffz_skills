@@ -35,6 +35,21 @@ Avoid:
 
 Respond in Chinese. Output only the findings, the unconfirmed-in-source items, and the revised text.
 
+The `## Revised Text` section must be a clean, learner-facing final version of
+the courseware. Do not include rebuttals, comparison against the original, or
+review commentary in the revised text. Avoid phrasing such as "不是原文中的 X,
+而是 Y", "原先理解不对", "应改为", "更准确地说", or any wording that points back
+to the original mistake. Put all critique, uncertainty, and evidence only in
+`## Findings` or `## Unconfirmed in Source`; the revised text should simply state
+the corrected explanation.
+
+Write corrections in the revised text as positive technical statements, not as
+warnings about what the original text must not do. Avoid negative or corrective
+framing such as "不能把它简化成...", "并不意味着...", "不要理解为...",
+"并非所有场景...", "取决于..., 不能...", or "原文忽略了...". Prefer direct
+conditions and mechanisms instead. The revised text should read as if it had
+always been written correctly, with no visible correction trail.
+
 Use this structure:
 
 ```markdown
@@ -57,7 +72,8 @@ Use this structure:
 
 ## Revised Text
 
-<full revised courseware text>
+<full revised courseware text, written as a clean final version without rebuttal
+or review commentary>
 ```
 
 If there are no clear errors, write:
@@ -73,7 +89,8 @@ None.
 
 ## Revised Text
 
-<original text, or the full text with only necessary additions>
+<original text, or the full text with only necessary additions, written as a
+clean final version without rebuttal or review commentary>
 ```
 
 Omit the `Required Additions` item when no additions are needed.

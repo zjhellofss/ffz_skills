@@ -1,0 +1,4 @@
+interface:
+  display_name: "审计 vLLM 课件"
+  short_description: "对照本地 vLLM 源码检查课件中过时/不一致/待核对的内容"
+  default_prompt: "Use $audit-vllm-courseware to audit this vLLM courseware against the local vLLM source and produce a staleness report."

@@ -1,6 +1,6 @@
 # ffz_skills
 
-这个仓库保存一组 Codex skills，用于课件润色、vLLM 课件源码核查、审计报告生成，以及根据审计结果对 Markdown 文档做低风险修订。
+这个仓库保存一组 Codex skills，用于课件润色、vLLM / SGLang 课件源码核查、审计报告生成，以及根据审计结果对 Markdown 文档做低风险修订。
 
 ## Skills
 
@@ -36,6 +36,22 @@ vLLM 课件诊断审计 skill。
 
 `Revised Text` 要求直接呈现正确说明，不保留审稿痕迹、反驳口吻或“原文应改为”这类对照式表达。
 
+### `review-sglang-courseware`
+
+中文 SGLang 课件审阅与修订 skill。
+
+适用于既要核查技术准确性，又要得到一份干净修订版课件的场景。它会先应用 `courseware-editor` 的课件编辑原则，再以本地安装的 SGLang Python 包源码为主要依据检查 SGLang 相关声明。
+
+重点核查 SGLang runtime/server、scheduler、model executor、tokenizer、sampling、constrained decoding、model loading、distributed execution、backend/kernel 等相关内容。
+
+输出包含：
+
+- `Findings`：已确认的问题与证据
+- `Unconfirmed in Source`：无法从本地源码确认的内容
+- `Revised Text`：面向学习者的最终修订文本
+
+`Revised Text` 要求直接呈现正确说明，不保留审稿痕迹、反驳口吻或“原文应改为”这类对照式表达。
+
 ### `revise-markdown-from-audit`
 
 基于审计报告修订 Markdown 的 skill。
@@ -54,6 +70,10 @@ vLLM 课件诊断审计 skill。
 
 使用 `review-vllm-courseware`。它会同时完成源码核查、问题说明和最终修订文本。
 
+### 生成修订后的 SGLang 课件
+
+使用 `review-sglang-courseware`。它会同时完成 SGLang 源码核查、问题说明和最终修订文本。
+
 ### 先审计，再精确修改 Markdown
 
 先使用 `audit-vllm-courseware` 生成审计报告，再使用 `revise-markdown-from-audit` 把确认的问题应用到 Markdown 文件中。
@@ -67,6 +87,7 @@ vLLM 课件诊断审计 skill。
 ```text
 audit-vllm-courseware/
 courseware-editor/
+review-sglang-courseware/
 review-vllm-courseware/
 revise-markdown-from-audit/
 ```
@@ -76,6 +97,7 @@ revise-markdown-from-audit/
 ## 注意事项
 
 - vLLM 相关 skill 依赖本地 Python 环境中安装的 vLLM 包。
-- vLLM 审计和审阅默认以本地源码为主要依据；除非用户明确要求，否则不使用网页搜索。
+- SGLang 相关 skill 依赖本地 Python 环境中安装的 SGLang 包。
+- vLLM / SGLang 审计和审阅默认以本地源码为主要依据；除非用户明确要求，否则不使用网页搜索。
 - 无法从本地源码确认的声明会被列为待核对或未确认，不会凭记忆静默改写。
 - `revise-markdown-from-audit` 只处理审计报告中已经确认的问题，不会顺手做全文重写或风格清理。

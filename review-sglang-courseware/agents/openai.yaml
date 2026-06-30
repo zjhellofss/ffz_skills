@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review SGLang Courseware"
+  short_description: "Review SGLang lessons against local source"
+  default_prompt: "Use $review-sglang-courseware to check and revise this SGLang courseware against the local SGLang source."

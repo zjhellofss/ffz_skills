@@ -1,0 +1,213 @@
+{
+  "schema_version": "2.0",
+  "rules_version": "2.2.0",
+  "calibration_status": "uncalibrated",
+  "heavy_subsectors": ["foundry", "idm", "osat"],
+  "weights": {
+    "equipment": {"D1": "22", "D2": "20", "D3": "18", "D4": "14", "D5": "19", "D6": "7"},
+    "materials": {"D1": "20", "D2": "23", "D3": "18", "D4": "16", "D5": "17", "D6": "6"},
+    "heavy": {"D1": "17", "D2": "20", "D3": "24", "D4": "22", "D5": "12", "D6": "5"},
+    "fabless": {"D1": "24", "D2": "26", "D3": "16", "D4": "12", "D5": "14", "D6": "8"},
+    "eda": {"D1": "22", "D2": "26", "D3": "16", "D4": "8", "D5": "16", "D6": "12"},
+    "ip": {"D1": "22", "D2": "22", "D3": "18", "D4": "12", "D5": "14", "D6": "12"}
+  },
+  "dimensions": {
+    "D1": {
+      "label": "成长持续性",
+      "metrics": ["rev_growth", "rev_cagr_3y", "nps_growth", "nps_cagr_3y"],
+      "formal_minimum": 2,
+      "provisional_minimum": 2,
+      "required": ["rev_growth"]
+    },
+    "D2": {
+      "label": "盈利能力",
+      "metrics": ["gross_margin_total", "net_margin_parent", "roe_weighted_parent"],
+      "formal_minimum": 2,
+      "provisional_minimum": 1,
+      "required": []
+    },
+    "D3": {
+      "label": "现金流质量",
+      "metrics": ["cash_conversion_parent", "fcf_long_term_assets_margin", "cash_receipts_to_revenue"],
+      "formal_minimum": 2,
+      "provisional_minimum": 1,
+      "required": []
+    },
+    "D4": {
+      "label": "资产负债健康",
+      "metrics": ["debt_to_assets", "current_ratio", "net_cash_to_assets"],
+      "formal_minimum": 2,
+      "provisional_minimum": 1,
+      "required": []
+    },
+    "D5": {
+      "label": "盈利质量",
+      "metrics": ["recurring_parent_profit_ratio", "government_grant_pnl_ratio", "rd_capitalization_rate"],
+      "formal_minimum": 2,
+      "provisional_minimum": 1,
+      "required": []
+    },
+    "D6": {
+      "label": "创新投入",
+      "metrics": ["rd_expense_intensity"],
+      "formal_minimum": 1,
+      "provisional_minimum": 1,
+      "required": []
+    }
+  },
+  "metrics": {
+    "rev_growth": {
+      "unit": "percent",
+      "method": "high",
+      "groups": {
+        "heavy": [["25", 5], ["15", 4], ["5", 3], ["0", 2]],
+        "other": [["40", 5], ["25", 4], ["10", 3], ["0", 2]],
+        "eda": [["30", 5], ["20", 4], ["10", 3], ["0", 2]],
+        "ip": [["30", 5], ["20", 4], ["10", 3], ["0", 2]]
+      }
+    },
+    "rev_cagr_3y": {
+      "unit": "percent",
+      "method": "high",
+      "groups": {
+        "heavy": [["15", 5], ["10", 4], ["5", 3], ["0", 2]],
+        "other": [["25", 5], ["15", 4], ["8", 3], ["0", 2]]
+      }
+    },
+    "nps_growth": {
+      "unit": "percent",
+      "method": "high",
+      "cuts": [["50", 5], ["25", 4], ["5", 3], ["-15", 2]]
+    },
+    "nps_cagr_3y": {
+      "unit": "percent",
+      "method": "high",
+      "cuts": [["30", 5], ["18", 4], ["8", 3], ["0", 2]]
+    },
+    "gross_margin_total": {
+      "unit": "percent",
+      "method": "high",
+      "groups": {
+        "equipment": [["45", 5], ["38", 4], ["30", 3], ["22", 2]],
+        "materials": [["42", 5], ["33", 4], ["25", 3], ["18", 2]],
+        "foundry": [["30", 5], ["22", 4], ["15", 3], ["8", 2]],
+        "idm": [["30", 5], ["22", 4], ["15", 3], ["8", 2]],
+        "osat": [["25", 5], ["18", 4], ["12", 3], ["6", 2]],
+        "fabless": [["55", 5], ["48", 4], ["40", 3], ["32", 2]],
+        "eda": [["80", 5], ["65", 4], ["50", 3], ["35", 2]],
+        "ip": [["50", 5], ["40", 4], ["30", 3], ["20", 2]]
+      }
+    },
+    "net_margin_parent": {
+      "unit": "percent",
+      "method": "high",
+      "cuts": [["25", 5], ["18", 4], ["10", 3], ["3", 2]]
+    },
+    "roe_weighted_parent": {
+      "unit": "percent",
+      "method": "high",
+      "cuts": [["18", 5], ["12", 4], ["7", 3], ["3", 2]]
+    },
+    "cash_conversion_parent": {
+      "unit": "ratio",
+      "method": "high",
+      "cuts": [["1.20", 5], ["0.90", 4], ["0.60", 3], ["0.30", 2]]
+    },
+    "fcf_long_term_assets_margin": {
+      "unit": "percent",
+      "method": "high",
+      "groups": {
+        "heavy": [["10", 5], ["0", 4], ["-20", 3], ["-40", 2]],
+        "other": [["15", 5], ["8", 4], ["2", 3], ["-5", 2]]
+      }
+    },
+    "cash_receipts_to_revenue": {
+      "unit": "ratio",
+      "method": "high",
+      "cuts": [["1.05", 5], ["0.95", 4], ["0.85", 3], ["0.70", 2]]
+    },
+    "debt_to_assets": {
+      "unit": "percent",
+      "method": "low",
+      "groups": {
+        "heavy": [["35", 5], ["48", 4], ["60", 3], ["72", 2]],
+        "other": [["25", 5], ["40", 4], ["55", 3], ["70", 2]]
+      }
+    },
+    "current_ratio": {
+      "unit": "ratio",
+      "method": "high",
+      "cuts": [["2.50", 5], ["1.80", 4], ["1.30", 3], ["1.00", 2]]
+    },
+    "net_cash_to_assets": {
+      "unit": "percent",
+      "method": "high",
+      "cuts": [["30", 5], ["15", 4], ["0", 3], ["-15", 2]]
+    },
+    "recurring_parent_profit_ratio": {
+      "unit": "ratio",
+      "method": "high",
+      "cuts": [["0.90", 5], ["0.75", 4], ["0.55", 3], ["0.35", 2]]
+    },
+    "government_grant_pnl_ratio": {
+      "unit": "percent",
+      "method": "low",
+      "cuts": [["10", 5], ["20", 4], ["35", 3], ["55", 2]]
+    },
+    "rd_capitalization_rate": {
+      "unit": "percent",
+      "method": "zero_then_low",
+      "zero_score": 5,
+      "cuts": [["5", 4], ["15", 3], ["30", 2]]
+    },
+    "rd_expense_intensity": {
+      "unit": "percent",
+      "method": "ranges",
+      "bands": [
+        {"score": 5, "ranges": [["12", true, "25", true]]},
+        {"score": 4, "ranges": [["8", true, "12", false], ["25", false, "30", true]]},
+        {"score": 3, "ranges": [["5", true, "8", false], ["30", false, "35", true]]},
+        {"score": 2, "ranges": [["3", true, "5", false], ["35", false, null, false]]}
+      ],
+      "default_score": 1,
+      "band_groups": {
+        "eda": [
+          {"score": 5, "ranges": [["25", true, "45", true]]},
+          {"score": 4, "ranges": [["18", true, "25", false], ["45", false, "55", true]]},
+          {"score": 3, "ranges": [["12", true, "18", false], ["55", false, "65", true]]},
+          {"score": 2, "ranges": [["8", true, "12", false], ["65", false, null, false]]}
+        ],
+        "ip": [
+          {"score": 5, "ranges": [["25", true, "45", true]]},
+          {"score": 4, "ranges": [["18", true, "25", false], ["45", false, "55", true]]},
+          {"score": 3, "ranges": [["12", true, "18", false], ["55", false, "65", true]]},
+          {"score": 2, "ranges": [["8", true, "12", false], ["65", false, null, false]]}
+        ]
+      }
+    }
+  },
+  "structural": {
+    "goodwill_to_parent_equity": {"unit": "percent", "kind": "numeric", "threshold": "30", "deduction": "0.20", "label": "商誉/归母净资产>30%", "grade_cap": null},
+    "largest_billed_customer_revenue_ratio": {"unit": "percent", "kind": "numeric", "threshold": "40", "deduction": "0.20", "label": "最大直接客户收入占比>40%", "grade_cap": null},
+    "largest_supplier_purchase_ratio": {"unit": "percent", "kind": "numeric", "threshold": "40", "deduction": "0.10", "label": "最大供应商采购占比>40%", "grade_cap": null},
+    "performance_commitment_flag": {"unit": "boolean", "kind": "boolean", "trigger": "1", "deduction": "0.20", "label": "业绩承诺严重未达标", "grade_cap": "B"},
+    "audit_issue": {"unit": "boolean", "kind": "boolean", "trigger": "1", "deduction": "0.50", "label": "审计/持续经营重大事项", "grade_cap": "C"},
+    "debt_default": {"unit": "boolean", "kind": "boolean", "trigger": "1", "deduction": "0.50", "label": "实质性债务违约", "grade_cap": "C"}
+  },
+  "alerts": {
+    "operating_cash_flow": {"unit": "currency", "direction": "below", "threshold": "0", "label": "OCF<0"},
+    "inventory_days_change": {"unit": "days", "direction": "above", "threshold": "30", "label": "存货周转天数增加>30天"},
+    "impairment_to_pbt": {"unit": "percent", "direction": "above", "threshold": "30", "label": "减值/利润总额>30%"},
+    "da_to_revenue": {"unit": "percent", "direction": "above_heavy", "threshold": "25", "label": "折旧摊销/营收>25%"},
+    "top5_billed_customer_revenue_ratio": {"unit": "percent", "direction": "above", "threshold": "60", "label": "前五大直接客户收入占比>60%"},
+    "top5_supplier_purchase_ratio": {"unit": "percent", "direction": "above", "threshold": "60", "label": "前五大供应商采购占比>60%"}
+  },
+  "grade_bands": [["4.20", "A"], ["3.60", "B+"], ["3.00", "B"], ["2.40", "C"], ["1.00", "D"]],
+  "deduction_cap": "0.80",
+  "tie_tolerance": "0.10",
+  "calibration": {
+    "status": "uncalibrated",
+    "note": "阈值为专家先验，未经真实同业 FY 样本分布校准。填入 samples 后由校准流程改写各指标 cut 点并将 status 置为 calibrated，禁止在无样本时手工翻转此状态。v2.2 新增的 eda/ip 权重与阈值（含 gross_margin_total、rev_growth、rd_expense_intensity 的 eda/ip 档）以及全子行业 D6 降权后的权重同为专家先验，一并待样本校准。",
+    "samples": {}
+  }
+}

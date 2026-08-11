@@ -1,0 +1,4 @@
+interface:
+  display_name: "本地财务数据基本面评分"
+  short_description: "直接读取本地财务数据，生成年度评分与季度TTM诊断"
+  default_prompt: "Use $jibenmian-pingfen-local-data to read /home/fss/data directly and produce traceable FY scores or quarterly TTM semiconductor diagnostics."

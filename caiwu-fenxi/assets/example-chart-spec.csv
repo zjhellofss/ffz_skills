@@ -1,0 +1,5 @@
+chart_id,title,fact_id,display_label,render,axis,period_order,missing_policy
+profit_structure,示例公司收入与毛利,f_rev,营业收入,bar,primary,1,gap
+profit_structure,示例公司收入与毛利,f_gp,毛利,bar,primary,1,gap
+cash_flow,示例公司现金流与自由现金流,f_ocf,经营现金流,bar,primary,1,gap
+cash_flow,示例公司现金流与自由现金流,f_fcf,自由现金流（长期资产现金支出口径）,bar,primary,1,gap

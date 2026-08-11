@@ -1,0 +1,4 @@
+interface:
+  display_name: "逐段审阅 vLLM 课件"
+  short_description: "逐文件审阅 split 目录中的 vLLM Markdown 课件"
+  default_prompt: "Use $review-vllm-split-courseware to review every Markdown file in split independently and write the results to reviewed."

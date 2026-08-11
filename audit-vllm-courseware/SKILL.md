@@ -20,12 +20,13 @@ Rewriting the full lesson is out of scope. Output is a report, not a revised doc
 1. Locate the installed vLLM source tree. Use `python3 -c "import vllm, os; print(os.path.dirname(vllm.__file__))"`; fall back to `python` only when `python3` is unavailable. When the import fails, ask the user for the clone path before proceeding.
 2. Record the installed version (`python3 -c "import vllm; print(vllm.__version__)"`) and the source path; include both in the report header.
 3. Read the provided lesson text and extract every concrete, verifiable claim: module/class/function names, parameter names and defaults, command-line flags, config keys, file paths, version-sensitive behavior, control flow, and API surfaces.
-4. For each claim, verify against the local source using `rg`, file reads, and `python3` introspection. Prefer the installed tree over imported runtime signal when the two disagree (write/discussion can lag source); note the discrepancy in the report.
-5. Classify each checked claim into one of the three categories. Skip claims that are correct and current — do not list them.
-6. Cite evidence for every finding: specific files, class/function names, line numbers when practical, and a short supporting quote or description.
-7. Comparison scope: the installed source tree. When a claim references a feature introduced after the installed version (or removed before it), classify as Outdated with the note that the installed version may differ from upstream HEAD.
-8. Do not browse the web. If external knowledge is needed, mark the claim as Needs Verification and state what local check was attempted.
-9. Phrase source-backed descriptions using the same wording discipline as `$review-vllm-courseware` requires for `## Revised Text`: clean technical statements, no rebuttal framing, no comparison against the original mistake, and no visible correction trail.
+4. Before finalizing extraction, scan all Markdown code blocks and inline code spans for vLLM-specific module/class/function/config identifiers and control-flow claims. For each implementation-specific identifier, run an exact source search. If a named class/function/module has zero local matches and the lesson does not clearly label it as pseudocode, report it as Outdated or Needs Verification instead of silently skipping it.
+5. For each claim, verify against the local source using `rg`, file reads, and `python3` introspection. Prefer the installed tree over imported runtime signal when the two disagree (write/discussion can lag source); note the discrepancy in the report.
+6. Classify each checked claim into one of the three categories. Skip claims that are correct and current — do not list them.
+7. Cite evidence for every finding: specific files, class/function names, line numbers when practical, and a short supporting quote or description.
+8. Comparison scope: the installed source tree. When a claim references a feature introduced after the installed version (or removed before it), classify as Outdated with the note that the installed version may differ from upstream HEAD.
+9. Do not browse the web. If external knowledge is needed, mark the claim as Needs Verification and state what local check was attempted.
+10. Phrase source-backed descriptions using the same wording discipline as `$review-vllm-courseware` requires for `## Revised Text`: clean technical statements, no rebuttal framing, no comparison against the original mistake, and no visible correction trail.
 
 ## What to Audit
 
@@ -35,6 +36,7 @@ Prioritize:
 - changed command-line flags, config keys, parameter names, defaults, or value ranges
 - changed parameter semantics, control flow, or module responsibilities
 - API surfaces whose names, signatures, or response shapes changed
+- code-block or inline-code identifiers that are presented as vLLM implementation symbols but do not exist in the installed source
 - version-sensitive behavior the lesson states unconditionally
 - file paths or project layout that no longer matches the installed tree
 - named integrations/connectors/backends that were added, removed, or moved

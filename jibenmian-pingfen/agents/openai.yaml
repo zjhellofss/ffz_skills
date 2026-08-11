@@ -1,0 +1,4 @@
+interface:
+  display_name: "基本面评分"
+  short_description: "半导体公司基本面严格评分、证据覆盖校验与同业排名分析"
+  default_prompt: "Use $jibenmian-pingfen to validate the financial fact ledger, produce traceable semiconductor fundamental scores, gate formal ratings, and rank only comparable same-subsector FY peers."

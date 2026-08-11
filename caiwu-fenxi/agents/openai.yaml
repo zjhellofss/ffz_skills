@@ -1,0 +1,4 @@
+interface:
+  display_name: "财务分析"
+  short_description: "基于可追溯事实台账的财报、基本面与半导体产业链分析"
+  default_prompt: "Use $caiwu-fenxi to build and validate a source-traceable fact ledger, then produce a plain-language financial and fundamental report with reproducible calculations, claims, and charts."

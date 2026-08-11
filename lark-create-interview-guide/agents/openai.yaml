@@ -1,0 +1,4 @@
+interface:
+  display_name: "飞书面经生成器"
+  short_description: "将飞书技术章节整理为忠于原文、经过校错并带原文定位的面经"
+  default_prompt: "使用 $lark-create-interview-guide 将这篇飞书技术文档整理成带原文定位的面经。"

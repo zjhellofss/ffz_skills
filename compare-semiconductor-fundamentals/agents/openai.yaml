@@ -1,0 +1,4 @@
+interface:
+  display_name: "半导体基本面对比"
+  short_description: "基于飞书财报分析文档的半导体基本面可追溯横向比较与排名工具"
+  default_prompt: "Use $compare-semiconductor-fundamentals to compare the semiconductor financial-analysis documents listed in this Feishu catalog and produce a source-traceable ranking."

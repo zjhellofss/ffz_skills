@@ -1,0 +1,4 @@
+interface:
+  display_name: "更新 SGLang 飞书课件"
+  short_description: "核对源码、重写排版并精准更新飞书中的 SGLang 技术课件"
+  default_prompt: "使用 $update-sglang-lark-courseware 核对这段 SGLang 课件并更新到指定飞书文档章节。"

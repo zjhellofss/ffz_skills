@@ -1,0 +1,11 @@
+fact_id,company,metric,period,period_type,scope,attribution,value,unit,currency,status,audit_status,source_file,locator_type,locator,source_line_item,formula,input_fact_ids,notes
+dp_rev,示例杜邦公司,revenue,FY2025,fy,consolidated,na,1000,million,CNY,reported,audited,example-dupont-source.txt,text_line,1,营业收入,,,
+dp_np_parent,示例杜邦公司,net_profit_parent,FY2025,fy,consolidated,parent,100,million,CNY,reported,audited,example-dupont-source.txt,text_line,2,归属于母公司股东的净利润,,,
+dp_np_total,示例杜邦公司,net_profit_total,FY2025,fy,consolidated,total,90,million,CNY,reported,audited,example-dupont-source.txt,text_line,3,净利润,,,
+dp_assets_open,示例杜邦公司,total_assets,2024-12-31,instant,consolidated,na,800,million,CNY,reported,audited,example-dupont-source.txt,text_line,4,资产总计,,,
+dp_assets_close,示例杜邦公司,total_assets,2025-12-31,instant,consolidated,na,1000,million,CNY,reported,audited,example-dupont-source.txt,text_line,5,资产总计,,,
+dp_parent_eq_open,示例杜邦公司,equity_parent,2024-12-31,instant,consolidated,parent,700,million,CNY,reported,audited,example-dupont-source.txt,text_line,6,归属于母公司所有者权益合计,,,
+dp_parent_eq_close,示例杜邦公司,equity_parent,2025-12-31,instant,consolidated,parent,900,million,CNY,reported,audited,example-dupont-source.txt,text_line,7,归属于母公司所有者权益合计,,,
+dp_total_eq_open,示例杜邦公司,equity_total,2024-12-31,instant,consolidated,total,750,million,CNY,reported,audited,example-dupont-source.txt,text_line,8,所有者权益合计,,,
+dp_total_eq_close,示例杜邦公司,equity_total,2025-12-31,instant,consolidated,total,950,million,CNY,reported,audited,example-dupont-source.txt,text_line,9,所有者权益合计,,,
+dp_roe,示例杜邦公司,roe_weighted_parent,FY2025,fy,consolidated,parent,12.5,percent,N/A,reported,audited,example-dupont-source.txt,text_line,10,加权平均净资产收益率,,,

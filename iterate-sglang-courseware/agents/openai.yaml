@@ -1,0 +1,4 @@
+interface:
+  display_name: "SGLang 课件迭代"
+  short_description: "面向 SGLang 课件的源码核查、学习答疑、内容整理与飞书精确更新"
+  default_prompt: "使用 $iterate-sglang-courseware 审阅、整理或更新这份 SGLang 课件，并严格保护未指定章节。"

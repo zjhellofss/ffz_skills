@@ -1,6 +1,6 @@
 # 权重、覆盖率、资格、扣分与排名（规则 v2.2.0）
 
-机器执行值以 `rules-v2.json` 为唯一配置源；本文件解释其业务含义。
+机器执行值以共享引擎读取的 `jibenmian-pingfen/references/rules-v2.json` 为准；本目录副本仅供阅读。本文件解释其业务含义。
 
 ## 1. 子行业权重
 
@@ -127,7 +127,7 @@ rating_state=FORMAL
 且同 rules_version
 ```
 
-Foundry、IDM、OSAT 即使共享权重也默认分别排名。单一公司 cohort 不显示名次。
+Foundry、IDM、OSAT 即使共享权重也默认分别排名。单一公司 cohort 不显示名次。未指定时 `peer_group=<subsector>-cn-a`。多公司用 `scripts/score_cohort.py` 一次生成同一 peer_group 输入后再打分。
 
 总分降序后，以每档第一家公司为锚；与锚分差 `<0.10` 的连续公司归为同档并显示相同名次区间。差值恰好 `0.10` 开新档，避免链式相邻比较造成非传递结果。跨子行业仅可做明确标注的概览，不构成正式排名。
 

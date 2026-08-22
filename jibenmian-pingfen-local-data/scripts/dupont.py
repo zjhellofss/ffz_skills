@@ -15,8 +15,9 @@ from pathlib import Path
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-if str(SCRIPT_DIR) not in sys.path:
-    sys.path.insert(0, str(SCRIPT_DIR))
+SHARED_DIR = SCRIPT_DIR.parents[1] / "jibenmian-pingfen" / "scripts"
+if str(SHARED_DIR) not in sys.path:
+    sys.path.insert(0, str(SHARED_DIR))
 
 from score import (  # noqa: E402
     D,
@@ -268,7 +269,7 @@ def build_parser() -> argparse.ArgumentParser:
 def run(args: argparse.Namespace) -> list[dict[str, str]]:
     if not args.input.exists() or not args.facts.exists():
         raise ValueError("输入映射或facts.csv不存在")
-    validation = run_fact_validator(args.facts, args.source_root, False)
+    validation = run_fact_validator(args.facts, args.source_root, False, "local")
     facts = load_facts(args.facts)
     mappings = read_mapping(args.input)
     rows = [calculate(row, verify_fact_set(row, facts)) for row in mappings]

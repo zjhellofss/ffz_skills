@@ -19,7 +19,7 @@ description: >-
 
 直接读取 `/home/fss/data/上市公司财务信息` 中按证券代码拆分的 CSV。不要读取年报 PDF，不要调用 `caiwu-fenxi`，也不要接收其 `facts.csv` 作为本 skill 的权威输入。
 
-使用规则 v2.2.0；机器执行值以 `references/rules-v2.json` 为唯一配置源。完整 FY 可以进入年度评级资格判断；Q1/Q2/Q3 只做 TTM 季度诊断，固定输出 `QUARTERLY_DIAGNOSTIC / N/R`。把阈值、权重、扣分和等级称为分析约定。高分不等于“该买”，低分不等于“该卖”；不输出目标价、估值结论或买卖建议。
+使用规则 v2.2.0；机器执行值以共享引擎读取的 `jibenmian-pingfen/references/rules-v2.json` 为准，本目录 `references/rules-v2.json` 仅作阅读副本。完整 FY 可以进入年度评级资格判断；Q1/Q2/Q3 只做 TTM 季度诊断，固定输出 `QUARTERLY_DIAGNOSTIC / N/R`。把阈值、权重、扣分和等级称为分析约定。高分不等于“该买”，低分不等于“该卖”；不输出目标价、估值结论或买卖建议。本地表通常缺客户/供应商、补助对账、研发资本化和违约筛查，因此完整 FY 也经常停在 `N/R` 诊断分，这是预期结果而不是脚本失败。
 
 严格区分：
 
@@ -30,13 +30,23 @@ description: >-
 
 生成的 `local-facts.csv` 是本次运行的可审计快照，不是 PDF 提取产物，也不是 `caiwu-fenxi` 中间产物。不得把其他来源的事实账本混入。
 
+评分引擎与 `jibenmian-pingfen` 共用 `scripts/score.py`；本 skill 只负责本地选行、映射和 CSV 溯源校验（`--evidence-validator local`）。规则文件仍放在本目录供阅读，但不得再复制一份独立引擎。
+
+路径互斥：
+
+- 年报 PDF / `caiwu-fenxi facts.csv` → `jibenmian-pingfen`，不要在这里打正式分；
+- 本地 CSV 快检和季度 TTM → 本 skill；结构筛查缺项时接受 `N/R`，不要用年报事实补洞去换 `FORMAL`；
+- 飞书目录横比 → `compare-semiconductor-fundamentals`，其 0–100 分不是本规则评级。
+
+同业默认 `peer_group=<subsector>-cn-a`。多家公司一起排名时用 `scripts/score_cohort.py --tickers ... --peer-group <id>`，不要把不同子行业或不同 FY 的输出手工拼进一张排名表。
+
 ## 必读资源
 
 按任务读取：
 
 - 数据目录、选行和字段映射：`references/local-data-contract.md`
 - 指标口径与缺失边界：`references/metric-inputs.md`
-- 打分阈值：`references/scoring-rubric.md` 和 `references/rules-v2.json`
+- 打分阈值：`references/scoring-rubric.md`；执行以 `jibenmian-pingfen/references/rules-v2.json` 为准
 - 评级资格、扣分和排名：`references/weights-and-flags.md`
 - 杜邦分解：`references/dupont.md`
 
@@ -172,6 +182,21 @@ python3 scripts/validate_local_facts.py \
 ```
 
 严格模式不允许跳过来源校验。
+
+多家同业一次排名：
+
+```bash
+python3 scripts/score_cohort.py \
+  --tickers 688981.SH,688347.SH \
+  --companies 中芯国际,华虹半导体 \
+  --subsector foundry \
+  --fy 2025 \
+  --peer-group foundry-cn-a \
+  --comparability-status comparable \
+  --business-scope-status pure_play \
+  --semiconductor-revenue-share 100 \
+  --out-dir /path/to/cohort
+```
 
 ## 局限
 

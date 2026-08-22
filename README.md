@@ -2,11 +2,11 @@
 
 这个仓库完整保存当前 Codex 环境中可用的 skills。每个 skill 都位于独立的顶层目录中，并保留其 `SKILL.md`、`agents/`、`assets/`、`references/`、`scripts/`、`tests/` 等配套资源。
 
-当前共收录 48 个 skills：
+当前共收录 51 个 skills：
 
-- 16 个用户级 Codex skills
+- 17 个用户级 Codex skills
 - 5 个 Codex 内置 skills
-- 27 个 Agents / Lark skills
+- 29 个 Agents / Lark skills
 
 ## 用户级 Codex skills
 
@@ -16,6 +16,7 @@
 - `compare-semiconductor-fundamentals`
 - `courseware-editor`
 - `extract-vllm-revised-text`
+- `iterate-sglang-courseware`
 - `jibenmian-pingfen`
 - `jibenmian-pingfen-local-data`
 - `lark-create-interview-guide`
@@ -64,6 +65,8 @@
 - `lark-wiki`
 - `lark-workflow-meeting-summary`
 - `lark-workflow-standup-report`
+- `semiconductor-valuation`
+- `估值`
 
 ## 同步说明
 

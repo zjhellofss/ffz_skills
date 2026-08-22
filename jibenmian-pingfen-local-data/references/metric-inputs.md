@@ -69,3 +69,5 @@ net_cash_to_assets
 - 扣非利润或折旧摊销季度字段为空时，对应 TTM 指标保持缺失。
 
 季度结果强制为 `QUARTERLY_DIAGNOSTIC / N/R`，不进入正式评级和排名。年度规则分档只用于诊断映射，不能声称季度结果具有年度审计评级效力。
+
+同业默认 `peer_group=<subsector>-cn-a`。多家公司用 `scripts/score_cohort.py` 合并同一 peer_group 后再调用共享 `score.py`。不要把 PDF 年报 facts 或飞书横比分数并入本路径。

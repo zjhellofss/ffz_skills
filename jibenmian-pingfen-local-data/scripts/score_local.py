@@ -37,6 +37,8 @@ def run_command(command: list[str]) -> None:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    if not args.ticker:
+        parser.error("必须提供--ticker")
     if args.with_dupont and args.period:
         parser.error("季度诊断暂不支持--with-dupont；请删除该参数")
     try:
@@ -50,6 +52,7 @@ def main(argv: list[str] | None = None) -> int:
         "--mode", "strict",
         "--facts", str(paths["facts"]),
         "--source-root", str(paths["source_root"]),
+        "--evidence-validator", "local",
         "--out-dir", str(args.out_dir),
     ]
     if args.quiet:

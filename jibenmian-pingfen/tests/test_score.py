@@ -36,12 +36,13 @@ class ScoreTests(unittest.TestCase):
     def example_facts(self) -> Path:
         return SKILL_ROOT / "assets" / "example-facts.csv"
 
-    def args(self, input_path: Path, mode: str, out_dir: Path | None = None, facts: Path | None = None):
+    def args(self, input_path: Path, mode: str, out_dir: Path | None = None, facts: Path | None = None, source_root: Path | None = None):
         return argparse.Namespace(
             csv=input_path,
             mode=mode,
             facts=facts,
-            source_root=SKILL_ROOT / "assets" if facts else None,
+            source_root=source_root if source_root is not None else (SKILL_ROOT / "assets" if facts else None),
+            evidence_validator="caiwu",
             skip_source_check=False,
             out=None,
             out_dir=out_dir,
@@ -384,6 +385,131 @@ class ScoreTests(unittest.TestCase):
                 score.score_metric("rd_expense_intensity", Decimal(value), "equipment").score,
                 expected,
             )
+
+    def test_prepare_score_input_round_trips_example_slots(self):
+        spec = importlib.util.spec_from_file_location(
+            "prepare_score_input", SKILL_ROOT / "scripts" / "prepare_score_input.py"
+        )
+        assert spec and spec.loader
+        prepare = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(prepare)
+        with tempfile.TemporaryDirectory() as tmp:
+            out_dir = Path(tmp)
+            self.assertEqual(
+                prepare.main([
+                    "--facts", str(self.example_facts),
+                    "--source-root", str(SKILL_ROOT / "assets"),
+                    "--company", "示例设备公司",
+                    "--entity-id", "example-equipment",
+                    "--subsector", "equipment",
+                    "--fy", "FY2025",
+                    "--peer-group", "equipment-cn",
+                    "--comparability-status", "comparable",
+                    "--business-scope-status", "pure_play",
+                    "--semiconductor-revenue-share", "100",
+                    "--out-dir", str(out_dir),
+                ]),
+                0,
+            )
+            with (out_dir / "score-input.csv").open(newline="", encoding="utf-8-sig") as handle:
+                generated = list(csv.DictReader(handle))
+            with self.example_input.open(newline="", encoding="utf-8-sig") as handle:
+                original = list(csv.DictReader(handle))
+            by_metric = {row["metric"]: row for row in generated}
+            for row in original:
+                self.assertIn(row["metric"], by_metric)
+                got = by_metric[row["metric"]]
+                self.assertEqual(got["status"], row["status"], row["metric"])
+                if row["status"] == "present":
+                    self.assertEqual(Decimal(got["value"]), Decimal(row["value"]), row["metric"])
+            results, warnings = score.run(
+                self.args(out_dir / "score-input.csv", "strict", out_dir / "score", out_dir / "facts.scored.csv")
+            )
+            self.assertEqual(warnings, [])
+            self.assertEqual(results[0]["rating_state"], "FORMAL")
+            self.assertEqual(results[0]["total"], Decimal("4.40"))
+
+    def test_prepare_score_input_maps_raw_ledger_and_keeps_gaps_missing(self):
+        spec = importlib.util.spec_from_file_location(
+            "prepare_score_input", SKILL_ROOT / "scripts" / "prepare_score_input.py"
+        )
+        assert spec and spec.loader
+        prepare = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(prepare)
+        fields = [
+            "fact_id", "company", "metric", "period", "period_type", "scope",
+            "attribution", "value", "unit", "currency", "status", "audit_status",
+            "source_file", "locator_type", "locator", "source_line_item", "formula",
+            "input_fact_ids", "notes",
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "source.txt"
+            source.write_text(
+                "\n".join([
+                    "营业收入2025=200",
+                    "营业收入2024=100",
+                    "营业成本2025=80",
+                    "归母净利润2025=40",
+                    "扣非归母净利润2025=36",
+                    "扣非归母净利润2024=30",
+                    "经营现金流2025=50",
+                    "资产总计2025=1000",
+                    "负债合计2025=400",
+                ]) + "\n",
+                encoding="utf-8",
+            )
+            facts_path = root / "facts.csv"
+            rows = [
+                ["f_rev_25", "示例材料", "revenue", "FY2025", "fy", "consolidated", "na", "200", "million", "CNY", "reported", "audited", "source.txt", "text_line", "1", "营业收入", "", "", ""],
+                ["f_rev_24", "示例材料", "revenue", "FY2024", "fy", "consolidated", "na", "100", "million", "CNY", "reported", "audited", "source.txt", "text_line", "2", "营业收入", "", "", ""],
+                ["f_cost_25", "示例材料", "operating_cost", "FY2025", "fy", "consolidated", "na", "80", "million", "CNY", "reported", "audited", "source.txt", "text_line", "3", "营业成本", "", "", ""],
+                ["f_np_25", "示例材料", "net_profit_parent", "FY2025", "fy", "consolidated", "parent", "40", "million", "CNY", "reported", "audited", "source.txt", "text_line", "4", "归母净利润", "", "", ""],
+                ["f_nps_25", "示例材料", "nps_parent", "FY2025", "fy", "consolidated", "parent", "36", "million", "CNY", "reported", "audited", "source.txt", "text_line", "5", "扣非归母净利润", "", "", ""],
+                ["f_nps_24", "示例材料", "nps_parent", "FY2024", "fy", "consolidated", "parent", "30", "million", "CNY", "reported", "audited", "source.txt", "text_line", "6", "扣非归母净利润", "", "", ""],
+                ["f_ocf_25", "示例材料", "operating_cash_flow", "FY2025", "fy", "consolidated", "na", "50", "million", "CNY", "reported", "audited", "source.txt", "text_line", "7", "经营现金流", "", "", ""],
+                ["f_assets_25", "示例材料", "total_assets", "2025-12-31", "instant", "consolidated", "na", "1000", "million", "CNY", "reported", "audited", "source.txt", "text_line", "8", "资产总计", "", "", ""],
+                ["f_liab_25", "示例材料", "total_liabilities", "2025-12-31", "instant", "consolidated", "na", "400", "million", "CNY", "reported", "audited", "source.txt", "text_line", "9", "负债合计", "", "", ""],
+            ]
+            with facts_path.open("w", newline="", encoding="utf-8-sig") as handle:
+                writer = csv.writer(handle)
+                writer.writerow(fields)
+                writer.writerows(rows)
+            out_dir = root / "prepared"
+            self.assertEqual(
+                prepare.main([
+                    "--facts", str(facts_path),
+                    "--source-root", str(root),
+                    "--company", "示例材料",
+                    "--subsector", "materials",
+                    "--fy", "2025",
+                    "--out-dir", str(out_dir),
+                ]),
+                0,
+            )
+            with (out_dir / "score-input.csv").open(newline="", encoding="utf-8-sig") as handle:
+                generated = {row["metric"]: row for row in csv.DictReader(handle)}
+            self.assertEqual(generated["rev_growth"]["status"], "present")
+            self.assertEqual(Decimal(generated["rev_growth"]["value"]), Decimal("100"))
+            self.assertEqual(generated["gross_margin_total"]["status"], "present")
+            self.assertEqual(Decimal(generated["gross_margin_total"]["value"]), Decimal("60"))
+            self.assertEqual(generated["nps_growth"]["status"], "present")
+            self.assertEqual(generated["rev_cagr_3y"]["status"], "missing")
+            self.assertEqual(generated["government_grant_pnl_ratio"]["status"], "missing")
+            self.assertEqual(generated["debt_to_assets"]["status"], "present")
+            self.assertEqual(Decimal(generated["debt_to_assets"]["value"]), Decimal("40"))
+            self.assertEqual(generated["rev_growth"]["peer_group"], "materials-cn-a")
+            results, _ = score.run(
+                self.args(
+                    out_dir / "score-input.csv",
+                    "strict",
+                    out_dir / "score",
+                    out_dir / "facts.scored.csv",
+                    root,
+                )
+            )
+            self.assertEqual(results[0]["rating"], "N/R")
+            self.assertIn("structural_screen_incomplete", results[0]["eligibility_reasons"])
 
 
 if __name__ == "__main__":

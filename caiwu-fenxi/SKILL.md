@@ -114,6 +114,14 @@ For semiconductor companies, also use all three industry references:
 - `references/semiconductor-metrics.md` for definitions and subsector-specific operating KPIs.
 - `references/semiconductor-red-flags.md` for industry-specific validation, earnings-quality signals, and open questions.
 
+This skill stops at a validated `facts.csv` plus the prose report. It does not score companies. If the user then wants a semiconductor fundamental grade:
+
+- Annual audited filings: keep this `facts.csv` and switch to `jibenmian-pingfen`. Run its `scripts/prepare_score_input.py` instead of hand-building `score-input.csv`.
+- Local structured CSVs under `/home/fss/data`: use `jibenmian-pingfen-local-data`. Do not feed this PDF ledger into that skill.
+- A Feishu folder of existing reports: use `compare-semiconductor-fundamentals`. That ranking is not a `jibenmian-pingfen` grade.
+
+Quarterly PDF analysis stays here. Do not send quarterly PDF facts into `jibenmian-pingfen` for a formal FY rating.
+
 ## Source Handling
 
 - If the user provides files, inspect them directly and cite local filenames plus pages, sections, tables, or note numbers where possible.

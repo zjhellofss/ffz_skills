@@ -7,6 +7,8 @@ description: 对飞书文档目录中列出的多家半导体公司基本面与�
 
 仅把用户提供的飞书目录文档及其可访问的报告子文档作为事实来源。`caiwu-fenxi` 是报告口径与行业判断框架；本技能负责把已有的公司报告转成可比、可审计的横向结论。
 
+本 skill **不是** `jibenmian-pingfen` 的下游。不要读取 `facts.csv`、`score_summary.csv` 或本地财务 CSV；也不要把这里的 0–100 表现分、模型调整后综合排序写成 A/B+/B 或 `FORMAL`。用户若要规则评级，应回到年报 PDF 走 `caiwu-fenxi` → `jibenmian-pingfen`，或走 `jibenmian-pingfen-local-data`。
+
 ## 读取边界
 
 - 将输入视为飞书 Docx/Wiki 目录 URL 或 token。用 `lark-doc` 读取；执行前遵守其前置要求，先读取 `lark-shared/SKILL.md` 与 `lark-doc/references/lark-doc-fetch.md`，并以 `--as user` 访问用户资料。

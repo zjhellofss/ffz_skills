@@ -227,3 +227,8 @@ python scripts/validate_analysis.py report report.md --facts facts.csv --semicon
 
 Resolve every error. Review every warning; either fix it or document why it is
 acceptable. Validation is a guardrail, not a substitute for reading the filing.
+
+A validated semiconductor FY ledger is an input to `jibenmian-pingfen`, not a
+score. Map it with `jibenmian-pingfen/scripts/prepare_score_input.py`. Do not
+hand-copy raw line items into `score-input.csv`, and do not send this ledger to
+`jibenmian-pingfen-local-data` or `compare-semiconductor-fundamentals`.

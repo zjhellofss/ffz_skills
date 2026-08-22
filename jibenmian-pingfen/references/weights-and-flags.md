@@ -38,7 +38,8 @@ EDA 和 IP 自 v2.2 起为独立子行业,不再套用 Fabless 代理规则。ED
 
 同时满足：
 
-- 使用 `--mode strict`，`facts.csv` 通过 `caiwu-fenxi` 严格校验且来源文件/locator 可核验；
+- 使用 `--mode strict`，`facts.csv` 通过对应证据校验器（年报路径=`caiwu-fenxi`，本地路径=`local`）且来源文件/locator 可核验；
+- FY 使用 `FY2025` 形式；`YYYYQ1/Q2/Q3` 只允许本地季度诊断，固定 `QUARTERLY_DIAGNOSTIC / N/R`，不排名；
 - 原始覆盖率≥85%；
 - 每维达到其 `formal_minimum`(D1–D5 为 2；D6 自 v2.1 收缩为单指标后为 1)，D1 必须含当前营收增速；
 - 所有已评分项及豁免状态证据有效，已评分财务事实均为 FY 审计口径；
@@ -63,6 +64,8 @@ EDA 和 IP 自 v2.2 起为独立子行业,不再套用 Fabless 代理规则。ED
 
 - 原始覆盖率<70%、缺维度/D1 门控、证据或审计口径失败、结构筛查不完整、多元业务未拆分、不可比时：`N/R`。
 - 旧六列 CSV 永远是 `LEGACY_DIAGNOSTIC / N/R`。脚本仍显示总分和 `diagnostic_grade`，但后者不是发布评级。
+- 本地 CSV 季度 TTM 永远是 `QUARTERLY_DIAGNOSTIC / N/R`，不进入排名。
+- 飞书横比的 0–100 分属于 `compare-semiconductor-fundamentals`，不得改写成这里的 A/B+/B。
 
 ## 4. 总分与舍入
 
@@ -126,7 +129,7 @@ rating_state=FORMAL
 且同 rules_version
 ```
 
-Foundry、IDM、OSAT 即使共享权重也默认分别排名。单一公司 cohort 不显示名次。
+Foundry、IDM、OSAT 即使共享权重也默认分别排名。单一公司 cohort 不显示名次。未指定时 `peer_group=<subsector>-cn-a`。年报路径把多家公司的 `score-input.csv` 合并后一次跑 `score.py`；本地路径用 `jibenmian-pingfen-local-data/scripts/score_cohort.py`。不要把不同路径的产物拼进同一张排名表。
 
 总分降序后，以每档第一家公司为锚；与锚分差 `<0.10` 的连续公司归为同档并显示相同名次区间。差值恰好 `0.10` 开新档，避免链式相邻比较造成非传递结果。跨子行业仅可做明确标注的概览，不构成正式排名。
 

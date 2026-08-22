@@ -21,8 +21,8 @@ company,entity_id,subsector,fy,peer_group,metric,value,unit,status,nm_reason,fac
 
 - `entity_id`：一次评分的稳定实体 ID。分部评分必须使用独立 ID。
 - `subsector`：`equipment/materials/foundry/idm/osat/fabless/eda/ip`。EDA/IP 自 v2.2 为独立子行业,不再套用 Fabless 代理规则。
-- `fy`：使用 `FY2025` 形式；正式评级只接受 FY 审计口径。
-- `peer_group`：同业池 ID；排名还会强制匹配子行业和 FY。
+- `fy`：使用 `FY2025` 形式；正式评级只接受 FY 审计口径。本地季度诊断可用 `2026Q1`。
+- `peer_group`：同业池 ID，默认 `<subsector>-cn-a`；排名还会强制匹配子行业和 FY。
 - `value`：从原始字符串解析为有限 `Decimal`；禁止 `NaN/Infinity`。
 - `unit`：百分比使用 `percent` 且输入百分点数，如 12.5% 输入 `12.5`；倍数使用 `ratio`，如 72.6% 的收现比输入 `0.726`；金额使用明确单位。
 - `fact_id`：正常数值或已核查 flag 对应的事实 ID，值、单位、公司和指标名必须一致。
@@ -142,13 +142,32 @@ company,entity_id,subsector,fy,peer_group,metric,value,unit,status,nm_reason,fac
 
 兼容模式会映射旧名，例如 `gross_margin→gross_margin_total`、`cash_conv→cash_conversion_parent_fy`、`fcf_margin→fcf_long_term_assets_margin`、`net_cash_ratio→net_cash_to_assets`、`subsidy_dep→government_grant_pnl_ratio`。严格模式拒绝旧名，避免把历史含混口径升级成正式事实。
 
-## 7. 推荐命令
+## 7. 从 facts.csv 生成评分输入
+
+不要手工把原始科目抄进 `score-input.csv`。运行：
 
 ```bash
-python3 scripts/score.py assets/example-input.csv \
+python3 scripts/prepare_score_input.py \
+  --facts facts.csv \
+  --source-root /path/to/source-files \
+  --subsector equipment \
+  --fy FY2025 \
+  --peer-group equipment-cn-a \
+  --comparability-status comparable \
+  --business-scope-status pure_play \
+  --semiconductor-revenue-share 100 \
+  --out-dir /path/to/prepared
+```
+
+资产负债等时点科目既接受 `FY2025`，也接受 `2025-12-31`/`instant`。不要因为期间标签不同就把 D4 打成缺失。
+
+再打分：
+
+```bash
+python3 scripts/score.py /path/to/prepared/score-input.csv \
   --mode strict \
-  --facts assets/example-facts.csv \
-  --source-root assets \
+  --facts /path/to/prepared/facts.scored.csv \
+  --source-root /path/to/source-files \
   --out-dir /path/to/output
 ```
 

@@ -9,6 +9,23 @@
 - 可核验来源：`assets/example-source.txt`
 - 口径：FY2025、审计、合并报表、设备类、纯半导体业务
 
+也可先由账本生成评分输入（本例账本已是槽位事实，生成结果应与 `assets/example-input.csv` 对齐）：
+
+```bash
+python3 scripts/prepare_score_input.py \
+  --facts assets/example-facts.csv \
+  --source-root assets \
+  --company 示例设备公司 \
+  --entity-id example-equipment \
+  --subsector equipment \
+  --fy FY2025 \
+  --peer-group equipment-cn \
+  --comparability-status comparable \
+  --business-scope-status pure_play \
+  --semiconductor-revenue-share 100 \
+  --out-dir /tmp/example-prepared
+```
+
 运行：
 
 ```bash

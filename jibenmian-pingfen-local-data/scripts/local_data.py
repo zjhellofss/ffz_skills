@@ -1586,6 +1586,8 @@ def prepare_local_inputs(args: argparse.Namespace) -> dict[str, Path | None]:
         year = int(match.group(1))
         quarter = int(match.group(2))
         period_label = normalized
+    if not getattr(args, "ticker", None):
+        raise ValueError("必须提供--ticker")
     ticker = args.ticker.upper()
     company = args.company or ticker
     share = D(str(args.semiconductor_revenue_share))
@@ -1678,7 +1680,7 @@ def prepare_local_inputs(args: argparse.Namespace) -> dict[str, Path | None]:
 
 
 def add_common_arguments(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--ticker", required=True, help="证券代码，例如688981.SH")
+    parser.add_argument("--ticker", help="证券代码，例如688981.SH")
     parser.add_argument("--subsector", required=True, choices=(
         "equipment", "materials", "foundry", "idm", "osat", "fabless", "eda", "ip",
     ))
@@ -1720,6 +1722,8 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    if not args.ticker:
+        parser.error("必须提供--ticker")
     try:
         paths = prepare_local_inputs(args)
     except ValueError as exc:

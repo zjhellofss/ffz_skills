@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """半导体产业链基本面评分器（规则 v2）。
 
-兼容模式可读取旧长表并复算诊断分；严格模式要求 v2 输入引用通过
-``caiwu-fenxi`` 校验的事实账本，才允许发布正式/暂定评级和同业排名。
+兼容模式可读取旧长表并复算诊断分；严格模式要求 v2 输入引用已校验事实账本。
+年报路径用 ``--evidence-validator caiwu``；本地 CSV 路径用 ``local``。
 
 示例::
 
@@ -17,6 +17,7 @@ import argparse
 import csv
 import hashlib
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -127,7 +128,7 @@ BOUNDED_PERCENT_METRICS = {
 }
 NONNEGATIVE_METRICS = {
     "current_ratio", "cash_receipts_to_revenue", "rd_expense_intensity",
-    "goodwill_to_parent_equity", "inventory_days_change", "da_to_revenue",
+    "goodwill_to_parent_equity", "da_to_revenue",
 }
 
 EXPECTED_ATTRIBUTION = {
@@ -239,7 +240,7 @@ def rules_digest() -> str:
 
 def units_match(expected: str, actual: str) -> bool:
     if expected == "currency":
-        return actual in CURRENCY_UNITS
+        return actual in CURRENCY_UNITS or actual == "currency"
     if expected == "boolean":
         return actual in {"boolean", "ratio"}
     return expected == actual
@@ -396,8 +397,8 @@ def parse_input(path: Path, mode: str) -> tuple[list[EntityInput], list[str]]:
                 }.items():
                     if not value:
                         raise ValueError(f"{where}: strict v2要求{name}非空")
-                if not fy.startswith("FY"):
-                    raise ValueError(f"{where}: fy应使用FY2025形式")
+                if not re.fullmatch(r"(?:FY\d{4}|\d{4}Q[1-3])", fy):
+                    raise ValueError(f"{where}: fy应使用FY2025或2026Q1形式")
                 if business_scope == "pure_play" and share is not None and share < D("70"):
                     raise ValueError(f"{where}: 主营占比<70%不能标记为pure_play")
                 if business_scope == "diversified_unallocated" and share is not None and share >= D("70"):
@@ -543,7 +544,30 @@ def _validate_cash_inputs(entity: EntityInput, mode: str) -> None:
             raise ValueError(f"{entity.entity_id}: 单年现金转换只允许在三年历史不足时回退")
 
 
-def run_fact_validator(facts_path: Path, source_root: Path | None, skip_source_check: bool) -> dict[str, Any]:
+def run_fact_validator(
+    facts_path: Path,
+    source_root: Path | None,
+    skip_source_check: bool,
+    evidence_validator: str = "caiwu",
+) -> dict[str, Any]:
+    if evidence_validator == "local":
+        if skip_source_check:
+            raise ValueError("本地结构化数据严格模式不允许跳过来源校验")
+        local_scripts = SKILL_ROOT.parent / "jibenmian-pingfen-local-data" / "scripts"
+        if str(local_scripts) not in sys.path:
+            sys.path.insert(0, str(local_scripts))
+        from validate_local_facts import validate_file  # type: ignore
+
+        payload = validate_file(facts_path, source_root)
+        if not payload.get("ok"):
+            issues = payload.get("issues", [])
+            preview = "; ".join(
+                f"{item.get('code', 'ISSUE')}@{item.get('location', '')}: {item.get('message', '')}"
+                for item in issues[:8]
+            )
+            raise ValueError(f"local-facts.csv严格校验失败: {preview}")
+        return payload
+
     validator = SKILL_ROOT.parent / "caiwu-fenxi" / "scripts" / "validate_analysis.py"
     if not validator.exists():
         raise ValueError(f"找不到上游事实校验器: {validator}")
@@ -696,12 +720,20 @@ def verify_evidence(entity: EntityInput, facts: dict[str, dict[str, str]]) -> No
             if observation.fact and observation.fact.get("status") != "calculated":
                 raise ValueError(f"{where}: CAGR必须是可重算的calculated fact")
 
+        current_period_id = observation.fact_id or (
+            observation.input_fact_ids[0] if observation.input_fact_ids else ""
+        )
         for fact_id in ids:
             fact = facts[fact_id]
             if fact.get("audit_status") != "audited":
                 verified = False
                 messages.append(f"{fact_id}非audited")
-            if not fact_period_matches(fact.get("period", ""), entity.fy):
+            historical_ok = (
+                observation.metric in {"rev_cagr_3y", "nps_cagr_3y"}
+                or observation.status in {"turnaround", "turn_loss", "not_meaningful"}
+            )
+            check_period = fact_id == current_period_id or not historical_ok
+            if check_period and not fact_period_matches(fact.get("period", ""), entity.fy):
                 verified = False
                 messages.append(f"{fact_id}期间不匹配{entity.fy}")
             scope = fact.get("scope", "")
@@ -1090,6 +1122,7 @@ def evaluate_entity(entity: EntityInput, mode: str) -> dict[str, Any]:
     business_ok = entity.business_scope_status in {"pure_play", "segment_scored"}
     comparable = entity.comparability_status == "comparable"
     limited = entity.comparability_status == "limited"
+    quarterly = bool(re.fullmatch(r"\d{4}Q[1-3]", entity.fy))
 
     reasons: list[str] = []
     if mode != "strict":
@@ -1108,9 +1141,16 @@ def evaluate_entity(entity: EntityInput, mode: str) -> dict[str, Any]:
         reasons.append("business_scope_not_eligible")
     if not comparable:
         reasons.append("comparability_not_full")
+    if quarterly:
+        reasons.append("quarterly_diagnostic_only")
 
     if mode != "strict":
         rating_state = "LEGACY_DIAGNOSTIC"
+        confidence = "低"
+        rating = "N/R"
+        formal = False
+    elif quarterly:
+        rating_state = "QUARTERLY_DIAGNOSTIC"
         confidence = "低"
         rating = "N/R"
         formal = False
@@ -1455,8 +1495,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("csv", type=Path, help="评分长表CSV")
     parser.add_argument("--mode", choices=("compat", "strict"), default="compat", help="compat只给诊断分；strict可给正式评级")
-    parser.add_argument("--facts", type=Path, help="caiwu-fenxi事实账本；strict必需")
+    parser.add_argument("--facts", type=Path, help="事实账本；strict必需")
     parser.add_argument("--source-root", type=Path, help="事实来源文件根目录")
+    parser.add_argument(
+        "--evidence-validator",
+        choices=("caiwu", "local"),
+        default="caiwu",
+        help="caiwu=年报facts.csv校验器；local=本地CSV溯源校验器",
+    )
     parser.add_argument("--skip-source-check", action="store_true", help="仅兼容诊断可跳过来源文件检查")
     parser.add_argument("--out", type=Path, help="写出兼容中文汇总CSV")
     parser.add_argument("--out-dir", type=Path, help="写出summary/detail/ranking/manifest及输入快照")
@@ -1479,7 +1525,12 @@ def run(args: argparse.Namespace) -> tuple[list[dict[str, Any]], list[str]]:
     fact_validation = None
     facts: dict[str, dict[str, str]] = {}
     if args.facts:
-        fact_validation = run_fact_validator(args.facts, args.source_root, args.skip_source_check)
+        fact_validation = run_fact_validator(
+            args.facts,
+            args.source_root,
+            args.skip_source_check,
+            getattr(args, "evidence_validator", "caiwu"),
+        )
         facts = load_facts(args.facts)
     if args.mode == "strict":
         for entity in entities:

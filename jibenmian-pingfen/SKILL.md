@@ -37,11 +37,25 @@ description: >-
 - 做 ROE 分解：`references/dupont.md`
 - 验证端到端运行：`references/worked-example.md`
 
+## 路径路由
+
+三条路径互斥，不要混用事实账本：
+
+| 用户给的材料 | 走哪个 skill | 产物 |
+|---|---|---|
+| 年报 PDF、附注、MD&A | `caiwu-fenxi` → 本 skill | 正式/暂定 FY 规则评级 |
+| `/home/fss/data` 结构化 CSV | `jibenmian-pingfen-local-data` | 本地诊断；缺结构筛查时通常 `N/R` |
+| 飞书目录里的已有报告 | `compare-semiconductor-fundamentals` | 飞书横比 0–100 分，**不是**本规则的 A/B+/B |
+
+季报 PDF 只做 `caiwu-fenxi` 财务分析，不要送进本 skill 求正式评级，也不要改走 local-data。本地 CSV 的季度 TTM 只属于 local-data。`compare` 的名次不得改写成 `FORMAL A`。
+
+同业默认 `peer_group=<subsector>-cn-a`。Foundry、IDM、OSAT 即使共享权重也分池。多公司排名必须同一 `subsector + FY + peer_group + calibration_status + rules_version`。
+
 ## 工作流
 
 ### 1. 建立或接收事实账本
 
-若用户提供原始年报、季报或财报数据，先使用 `caiwu-fenxi`：
+若用户提供原始年报或已审计 FY 财报，先使用 `caiwu-fenxi`：
 
 1. 建立 `facts.csv`；
 2. 核对资产负债表、利润表、现金流量表和关键注释；
@@ -63,7 +77,23 @@ description: >-
 
 ### 3. 准备 v2 score-input.csv
 
-按 `references/metric-inputs.md` 映射 17 个核心槽位、6 个结构性筛查和预警槽位(v2.1 起前五客户/供应商为预警,不计入核心槽位)。每个正常数值引用 `fact_id`；扭亏/转亏、N/M、N/A 和三年 CAGR 引用 `input_fact_ids`。
+不要手填评分长表。先运行：
+
+```bash
+python3 scripts/prepare_score_input.py \
+  --facts facts.csv \
+  --source-root /path/to/source-files \
+  --company 安集科技 \
+  --subsector materials \
+  --fy FY2025 \
+  --peer-group materials-cn-a \
+  --comparability-status comparable \
+  --business-scope-status pure_play \
+  --semiconductor-revenue-share 100 \
+  --out-dir /path/to/prepared
+```
+
+脚本会从原始科目计算可重算槽位，缺证据的槽位写成受控 `missing/not_meaningful`，并写出 `score-input.csv` 与补齐后的 `facts.scored.csv`。资产负债等时点科目既接受 `FY2025` 也接受 `2025-12-31`/`instant`。再按 `references/metric-inputs.md` 检查 17 个核心槽位、6 个结构性筛查和预警槽位。每个正常数值引用 `fact_id`；扭亏/转亏、N/M、N/A 和三年 CAGR 引用 `input_fact_ids`。
 
 执行以下约束：
 
@@ -82,9 +112,9 @@ description: >-
 运行：
 
 ```bash
-python3 scripts/score.py score-input.csv \
+python3 scripts/score.py /path/to/prepared/score-input.csv \
   --mode strict \
-  --facts facts.csv \
+  --facts /path/to/prepared/facts.scored.csv \
   --source-root /path/to/source-files \
   --out-dir /path/to/score-output
 ```
